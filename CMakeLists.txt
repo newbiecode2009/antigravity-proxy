@@ -138,4 +138,12 @@ if(BUILD_TESTS)
   )
   target_link_libraries(antigravity_tests PRIVATE ws2_32)
   add_test(NAME antigravity_tests COMMAND antigravity_tests)
+
+  add_executable(process_name_tests
+    "tests/test_process_name.cpp"
+  )
+  target_include_directories(process_name_tests PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/src"
+  )
+  add_test(NAME process_name_tests COMMAND process_name_tests)
 endif()

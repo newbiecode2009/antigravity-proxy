@@ -232,6 +232,24 @@ curl -x http://127.0.0.1:7890 https://www.google.com -I
 
 把 `version.dll` 和 `config.json` 复制到 **Antigravity 主程序目录**（与 `Antigravity.exe` 同级）。然后启动 Antigravity，搞定。
 
+#### Antigravity 2.0 注意事项
+
+Antigravity 2.0 新增/改名了关键进程，默认配置已覆盖：
+
+```json
+"target_processes": [
+  "language_server.exe",
+  "language_server_windows",
+  "Antigravity.exe",
+  "Antigravity IDE.exe",
+  "node.exe"
+]
+```
+
+如果你是从旧版本手动迁移 `config.json`，请确认 `child_injection` 仍为 `true`，并把上面的目标进程列表同步进去。2.0 环境如果存在多个启动目录，也要把 `version.dll` 和 `config.json` 放到实际启动的 Antigravity/IDE 目录中。
+
+更多现场记录见 `docs/antigravity-2.0-issue-85.md`。
+
 #### Windows 常见目录 + 快速跳转
 
 一般情况下 Antigravity 会装在：
@@ -721,7 +739,14 @@ target_link_libraries(version PRIVATE ws2_32)
         "recv": 5000
     },
     "child_injection": true,
-    "target_processes": [],
+    "child_injection_mode": "filtered",
+    "target_processes": [
+        "language_server.exe",
+        "language_server_windows",
+        "Antigravity.exe",
+        "Antigravity IDE.exe",
+        "node.exe"
+    ],
     "proxy_rules": {
         "allowed_ports": [80, 443],
         "dns_mode": "direct",

@@ -230,6 +230,24 @@ You need two files:
 
 Copy `version.dll` and `config.json` to Antigravity’s main program directory (next to `Antigravity.exe`). Then launch Antigravity — done.
 
+#### Antigravity 2.0 Notes
+
+Antigravity 2.0 added/renamed key processes. The default config now covers:
+
+```json
+"target_processes": [
+  "language_server.exe",
+  "language_server_windows",
+  "Antigravity.exe",
+  "Antigravity IDE.exe",
+  "node.exe"
+]
+```
+
+If you are migrating an old `config.json`, make sure `child_injection` is still `true` and sync the target process list above. If your 2.0 install has more than one launch directory, place `version.dll` and `config.json` in the actual Antigravity/IDE directory being launched.
+
+More field notes: `docs/antigravity-2.0-issue-85.md`.
+
 #### Common Windows Path + Quick Jump
 
 In most cases, Antigravity is installed at:
@@ -697,7 +715,14 @@ Edit `config.json`:
         "recv": 5000
     },
     "child_injection": true,
-    "target_processes": []
+    "child_injection_mode": "filtered",
+    "target_processes": [
+        "language_server.exe",
+        "language_server_windows",
+        "Antigravity.exe",
+        "Antigravity IDE.exe",
+        "node.exe"
+    ]
 }
 ```
 
