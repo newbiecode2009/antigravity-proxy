@@ -76,6 +76,7 @@ set(SOURCES_PROXY
   "src/main.cpp"
   "src/hooks/Hooks.cpp"
   "src/proxy/VersionProxy.cpp"
+  "src/update/UpdateChecker.cpp"
 )
 
 # Resources
@@ -102,8 +103,8 @@ target_include_directories(version PUBLIC
 target_include_directories(version PRIVATE "src/")
 target_include_directories(version PRIVATE "src/hde/")
 
-# Link WS2_32
-target_link_libraries(version PRIVATE ws2_32)
+# Link WS2_32 / WinHTTP
+target_link_libraries(version PRIVATE ws2_32 winhttp)
 
 # Build Antigravity CLI shim (输出名为 dbghelp.dll)
 add_library(dbghelp SHARED

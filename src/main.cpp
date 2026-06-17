@@ -10,6 +10,7 @@
 #include <string>
 #include "core/Config.hpp"
 #include "core/Logger.hpp"
+#include "update/UpdateChecker.hpp"
 
 // 前向声明
 namespace Hooks {
@@ -199,6 +200,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
         // 安装 Hooks（必须及时安装以确保网络流量被正确拦截）
         Hooks::Install();
         MaybeShowLoadNotifyAsync(true);
+        // 更新检查默认关闭；启用后也只在后台异步提示，不阻塞 Hook 安装主流程。
+        UpdateChecker::StartAsync();
         break;
     }
         

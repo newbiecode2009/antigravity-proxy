@@ -325,6 +325,22 @@ $configJson = @{
         send = 5000
         recv = 5000
     }
+    # 更新检查默认关闭；启用后仅异步检查 GitHub Release 并提示打开下载页，不自动下载文件
+    updates = @{
+        enabled = $false
+        check_delay_ms = 15000
+        timeout_ms = 5000
+        notify_once = $true
+        allow_insecure_mirrors = $true
+        mirrors = @(
+            "https://wget.la/",
+            "https://rapidgit.jjda.de5.net/",
+            "https://fastgit.cc/",
+            "https://gitproxy.mrhjx.cn/",
+            "https://github.boki.moe/",
+            "https://github.ednovas.xyz/"
+        )
+    }
     traffic_logging = $false
     child_injection = $true
     # 子进程注入模式: filtered(按target_processes过滤) / inherit(注入所有子进程)

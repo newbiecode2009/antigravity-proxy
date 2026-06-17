@@ -100,6 +100,10 @@
               <span class="nav-ico"><i class="fa-solid fa-shield-halved"></i></span>
               <span class="flex-1 text-left">网络策略</span>
             </button>
+            <button class="nav-btn" type="button" data-section="updates">
+              <span class="nav-ico"><i class="fa-solid fa-cloud-arrow-down"></i></span>
+              <span class="flex-1 text-left">更新检查</span>
+            </button>
             <button class="nav-btn" type="button" data-section="routing">
               <span class="nav-ico"><i class="fa-solid fa-route"></i></span>
               <span class="flex-1 text-left">路由规则</span>
@@ -674,6 +678,107 @@
                   </select>
                   <div class="field-error" data-error-for="proxy_rules.udp_fallback"></div>
                 </div>
+              </fieldset>
+            </div>
+          </section>
+
+          <!-- UPDATES -->
+          <section class="panel hidden" data-panel="updates">
+            <div class="panel-hd">
+              <div>
+                <h2 class="panel-title">更新检查</h2>
+                <p class="panel-subtitle">updates：GitHub Release 异步提醒</p>
+              </div>
+            </div>
+            <div class="panel-bd space-y-6">
+              <fieldset class="grid grid-cols-1 gap-4 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/40 md:grid-cols-2">
+                <legend class="px-2 text-sm font-semibold text-slate-700 dark:text-slate-200">后台检查</legend>
+
+                <div class="field">
+                  <label class="field-label">
+                    <span class="font-mono">updates.enabled</span>
+                    <span class="tip">
+                      <i class="fa-solid fa-circle-info"></i>
+                      <span class="tip-pop">作用：启用 GitHub Release 更新检查。取值：布尔值。影响：开启后 DLL 加载成功会延迟异步联网检查，仅提示打开 Release 页面，不自动下载。建议：需要更新提醒时再开启。</span>
+                    </span>
+                  </label>
+                  <label class="toggle">
+                    <input type="checkbox" data-bind="updates.enabled" />
+                    <span class="toggle-ui"></span>
+                    <span class="text-sm text-slate-700 dark:text-slate-200">启用</span>
+                  </label>
+                  <div class="field-error" data-error-for="updates.enabled"></div>
+                </div>
+
+                <div class="field">
+                  <label class="field-label">
+                    <span class="font-mono">updates.notify_once</span>
+                    <span class="tip">
+                      <i class="fa-solid fa-circle-info"></i>
+                      <span class="tip-pop">作用：同一新版本只提醒一次。取值：布尔值。影响：避免多个进程重复弹窗。建议：保持开启。</span>
+                    </span>
+                  </label>
+                  <label class="toggle">
+                    <input type="checkbox" data-bind="updates.notify_once" />
+                    <span class="toggle-ui"></span>
+                    <span class="text-sm text-slate-700 dark:text-slate-200">启用</span>
+                  </label>
+                  <div class="field-error" data-error-for="updates.notify_once"></div>
+                </div>
+
+                <div class="field">
+                  <label class="field-label" for="updates_delay">
+                    <span class="font-mono">updates.check_delay_ms</span>
+                    <span class="tip">
+                      <i class="fa-solid fa-circle-info"></i>
+                      <span class="tip-pop">作用：DLL 加载成功后延迟多少毫秒再检查更新。取值：0 或正整数。影响：值越大越不影响启动主流程。建议：15000。</span>
+                    </span>
+                  </label>
+                  <input id="updates_delay" class="field-input" type="number" min="0" step="1000" data-bind="updates.check_delay_ms" />
+                  <div class="field-error" data-error-for="updates.check_delay_ms"></div>
+                </div>
+
+                <div class="field">
+                  <label class="field-label" for="updates_timeout">
+                    <span class="font-mono">updates.timeout_ms</span>
+                    <span class="tip">
+                      <i class="fa-solid fa-circle-info"></i>
+                      <span class="tip-pop">作用：单次 GitHub 或代理站请求超时。取值：正整数。影响：过大可能延长后台等待，过小可能误判失败。建议：5000。</span>
+                    </span>
+                  </label>
+                  <input id="updates_timeout" class="field-input" type="number" min="1" step="500" data-bind="updates.timeout_ms" />
+                  <div class="field-error" data-error-for="updates.timeout_ms"></div>
+                </div>
+
+                <div class="field md:col-span-2">
+                  <label class="field-label">
+                    <span class="font-mono">updates.allow_insecure_mirrors</span>
+                    <span class="tip">
+                      <i class="fa-solid fa-circle-info"></i>
+                      <span class="tip-pop">作用：仅对 GitHub 代理站忽略证书链/域名/日期错误。取值：布尔值。影响：提升代理站兼容性，但安全性更弱。建议：仅在依赖代理站时开启。</span>
+                    </span>
+                  </label>
+                  <label class="toggle">
+                    <input type="checkbox" data-bind="updates.allow_insecure_mirrors" />
+                    <span class="toggle-ui"></span>
+                    <span class="text-sm text-slate-700 dark:text-slate-200">启用</span>
+                  </label>
+                  <div class="field-error" data-error-for="updates.allow_insecure_mirrors"></div>
+                </div>
+              </fieldset>
+
+              <fieldset class="grid grid-cols-1 gap-4 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/40">
+                <legend class="px-2 text-sm font-semibold text-slate-700 dark:text-slate-200">GitHub 代理站（updates.mirrors）</legend>
+                <div class="text-xs text-slate-500 dark:text-slate-400">
+                  直连 GitHub Release API 失败后会按顺序轮询代理站，仅获取版本元数据；弹窗仍跳转 GitHub Release 页面。
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <button id="btnUpdateMirrorsAdd" class="btn btn-ghost" type="button">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>添加代理站</span>
+                  </button>
+                </div>
+                <div id="updateMirrorsList" class="mt-2 space-y-2"></div>
               </fieldset>
             </div>
           </section>
@@ -1422,6 +1527,21 @@
           proxy: { host: "127.0.0.1", port: 7890, type: "socks5" },
           fake_ip: { enabled: true, cidr: "198.18.0.0/15" },
           timeout: { connect: 5000, send: 5000, recv: 5000 },
+          updates: {
+            enabled: false,
+            check_delay_ms: 15000,
+            timeout_ms: 5000,
+            notify_once: true,
+            allow_insecure_mirrors: true,
+            mirrors: [
+              "https://wget.la/",
+              "https://rapidgit.jjda.de5.net/",
+              "https://fastgit.cc/",
+              "https://gitproxy.mrhjx.cn/",
+              "https://github.boki.moe/",
+              "https://github.ednovas.xyz/",
+            ],
+          },
           traffic_logging: false,
           child_injection: true,
           child_injection_mode: "filtered",
@@ -1512,6 +1632,19 @@
           if (out.timeout.send <= 0) out.timeout.send = base.timeout.send;
           if (out.timeout.recv <= 0) out.timeout.recv = base.timeout.recv;
 
+          // updates
+          const upd = j.updates && typeof j.updates === "object" ? j.updates : {};
+          out.updates.enabled = normalizeBool(upd.enabled, base.updates.enabled);
+          out.updates.check_delay_ms = normalizeInt(upd.check_delay_ms, base.updates.check_delay_ms);
+          out.updates.timeout_ms = normalizeInt(upd.timeout_ms, base.updates.timeout_ms);
+          out.updates.notify_once = normalizeBool(upd.notify_once, base.updates.notify_once);
+          out.updates.allow_insecure_mirrors = normalizeBool(upd.allow_insecure_mirrors, base.updates.allow_insecure_mirrors);
+          out.updates.mirrors = Array.isArray(upd.mirrors)
+            ? normalizeStringArray(upd.mirrors)
+            : deepClone(base.updates.mirrors);
+          if (out.updates.check_delay_ms < 0) out.updates.check_delay_ms = base.updates.check_delay_ms;
+          if (out.updates.timeout_ms <= 0) out.updates.timeout_ms = base.updates.timeout_ms;
+
           // phase2/3
           out.traffic_logging = normalizeBool(j.traffic_logging, base.traffic_logging);
           out.child_injection = normalizeBool(j.child_injection, base.child_injection);
@@ -1585,6 +1718,7 @@
           "proxy",
           "fake_ip",
           "timeout",
+          "updates",
           "traffic_logging",
           "child_injection",
           "child_injection_mode",
@@ -1615,6 +1749,12 @@
           "timeout.connect",
           "timeout.send",
           "timeout.recv",
+          "updates.enabled",
+          "updates.check_delay_ms",
+          "updates.timeout_ms",
+          "updates.notify_once",
+          "updates.allow_insecure_mirrors",
+          "updates.mirrors[]",
           "traffic_logging",
           "child_injection",
           "child_injection_mode",
@@ -1654,6 +1794,11 @@
           "timeout.connect",
           "timeout.send",
           "timeout.recv",
+          "updates.enabled",
+          "updates.check_delay_ms",
+          "updates.timeout_ms",
+          "updates.notify_once",
+          "updates.allow_insecure_mirrors",
           "traffic_logging",
           "child_injection",
           "child_injection_mode",
@@ -1671,6 +1816,7 @@
           "proxy_rules.allowed_ports[]": "allowedPortsList",
           "target_processes[]": "targetProcessesList",
           "child_injection_exclude[]": "childExcludeList",
+          "updates.mirrors[]": "updateMirrorsList",
           "proxy_rules.routing.rules[].ip_cidrs_v4[]": "rule_ip_cidrs_v4",
           "proxy_rules.routing.rules[].ip_cidrs_v6[]": "rule_ip_cidrs_v6",
           "proxy_rules.routing.rules[].domains[]": "rule_domains",
@@ -1771,6 +1917,12 @@
             "fake_ip.enabled",
             "fake_ip.cidr",
             "timeout.",
+            "updates.enabled",
+            "updates.check_delay_ms",
+            "updates.timeout_ms",
+            "updates.notify_once",
+            "updates.allow_insecure_mirrors",
+            "updates.mirrors",
             "traffic_logging",
             "child_injection",
             "child_injection_mode",
@@ -1847,6 +1999,15 @@
           outTimeout.send = state.form.timeout.send;
           outTimeout.recv = state.form.timeout.recv;
 
+          // updates
+          const outUpdates = ensureObjIn(out, "updates");
+          outUpdates.enabled = !!state.form.updates.enabled;
+          outUpdates.check_delay_ms = state.form.updates.check_delay_ms;
+          outUpdates.timeout_ms = state.form.updates.timeout_ms;
+          outUpdates.notify_once = !!state.form.updates.notify_once;
+          outUpdates.allow_insecure_mirrors = !!state.form.updates.allow_insecure_mirrors;
+          outUpdates.mirrors = deepClone(state.form.updates.mirrors);
+
           // proxy_rules
           const outPr = ensureObjIn(out, "proxy_rules");
           outPr.allowed_ports = deepClone(state.form.proxy_rules.allowed_ports);
@@ -1920,6 +2081,22 @@
             const v = state.form.timeout[k];
             if (!Number.isInteger(v) || v <= 0) err(`timeout.${k}`, "必须为正整数（毫秒）");
           }
+
+          // updates
+          if (typeof state.form.updates.enabled !== "boolean") err("updates.enabled", "必须为布尔值");
+          if (typeof state.form.updates.notify_once !== "boolean") err("updates.notify_once", "必须为布尔值");
+          if (typeof state.form.updates.allow_insecure_mirrors !== "boolean") err("updates.allow_insecure_mirrors", "必须为布尔值");
+          if (!Number.isInteger(state.form.updates.check_delay_ms) || state.form.updates.check_delay_ms < 0) {
+            err("updates.check_delay_ms", "必须为 0 或正整数（毫秒）");
+          }
+          if (!Number.isInteger(state.form.updates.timeout_ms) || state.form.updates.timeout_ms <= 0) {
+            err("updates.timeout_ms", "必须为正整数（毫秒）");
+          }
+          (state.form.updates.mirrors || []).forEach((s, i) => {
+            const v = trim(s);
+            if (!v) err(`updates.mirrors[${i}]`, "代理站不能为空");
+            if (v && !/^https:\/\//i.test(v)) err(`updates.mirrors[${i}]`, "代理站必须使用 https://");
+          });
 
           // phase2/3 scalar
           if (typeof state.form.traffic_logging !== "boolean") err("traffic_logging", "必须为布尔值");
@@ -2552,6 +2729,7 @@
           setFormToInputs();
           validateAll();
           renderAllowedPorts();
+          renderUpdateMirrors();
           renderTargetProcesses();
           renderChildExclude();
           renderRuleList();
@@ -2564,6 +2742,9 @@
         // -------------------------
         const renderAllowedPorts = () => {
           renderSimpleList($("allowedPortsList"), "proxy_rules.allowed_ports", "number");
+        };
+        const renderUpdateMirrors = () => {
+          renderSimpleList($("updateMirrorsList"), "updates.mirrors", "text");
         };
         const renderTargetProcesses = () => {
           renderSimpleList($("targetProcessesList"), "target_processes", "text");
@@ -2883,6 +3064,13 @@
             markDirty();
             validateAll();
             renderAllowedPorts();
+            renderAllLight();
+          });
+          $("btnUpdateMirrorsAdd")?.addEventListener("click", () => {
+            state.form.updates.mirrors.push("https://");
+            markDirty();
+            validateAll();
+            renderUpdateMirrors();
             renderAllLight();
           });
           $("btnTargetProcessesAdd")?.addEventListener("click", () => {

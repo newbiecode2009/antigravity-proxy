@@ -33,6 +33,24 @@ namespace Core {
         int recv_ms = 5000;
     };
 
+    struct UpdateConfig {
+        // 自动更新检查默认关闭，避免 release 启动后默认访问 GitHub。
+        bool enabled = false;
+        // 延迟启动后台检查，确保主流程 Hook 加载不被更新检查影响。
+        int check_delay_ms = 15000;
+        int timeout_ms = 5000;
+        bool notify_once = true;
+        bool allow_insecure_mirrors = true;
+        std::vector<std::string> mirrors = {
+            "https://wget.la/",
+            "https://rapidgit.jjda.de5.net/",
+            "https://fastgit.cc/",
+            "https://gitproxy.mrhjx.cn/",
+            "https://github.boki.moe/",
+            "https://github.ednovas.xyz/"
+        };
+    };
+
     // ============= 路由规则配置（支持 IP/CIDR/域名通配符/端口/协议） =============
     struct RoutingRule {
         std::string name;
@@ -634,6 +652,8 @@ namespace Core {
         bool trafficLogging = false;    // Phase 3: 是否启用流量监控日志
         bool diagnosticsAgentIpProbe = false; // 默认关闭外部 IP 探测，降低 release 默认联网行为面
         std::string uiLoadNotify = "once";    // 加载提示策略：once/none/messagebox，默认每个版本成功提示一次
+        std::string buildVersion = "0";        // 来自 config.json 的 _version，用于更新检查比较
+        UpdateConfig updates;                  // GitHub Release 更新检查配置（默认关闭）
         bool childInjection = true;     // Phase 2: 是否自动注入子进程
         // 子进程注入模式：
         // - "filtered"（默认）：按 target_processes 过滤
@@ -720,6 +740,7 @@ namespace Core {
                     return false;
                 }
                 nlohmann::json j = nlohmann::json::parse(f);
+                buildVersion = j.value("_version", "0");
 
                 // 日志等级：默认 info（更克制），允许通过配置切到 debug 以获得更细粒度排障信息
                 // 设计意图：默认减少刷屏/IO 开销，现场需要时可提升日志粒度。
@@ -750,6 +771,8 @@ namespace Core {
                     if (begin == 0 && end == s.size()) return;
                     s = s.substr(begin, end - begin);
                 };
+                trimInPlace(buildVersion);
+                if (buildVersion.empty()) buildVersion = "0";
                 trimInPlace(proxy.type);
                 std::transform(proxy.type.begin(), proxy.type.end(), proxy.type.begin(),
                                [](unsigned char c) { return (char)std::tolower(c); });
@@ -821,6 +844,35 @@ namespace Core {
                 if (uiLoadNotify != "once" && uiLoadNotify != "none" && uiLoadNotify != "messagebox") {
                     Logger::Warn("配置: ui.load_notify 无效(" + uiLoadNotify + ")，已回退为 once (可选: once/none/messagebox)");
                     uiLoadNotify = "once";
+                }
+
+                // GitHub Release 更新检查：默认关闭；仅用户显式开启后才启动后台联网检查。
+                if (j.contains("updates") && j["updates"].is_object()) {
+                    const auto& upd = j["updates"];
+                    updates.enabled = upd.value("enabled", false);
+                    updates.check_delay_ms = upd.value("check_delay_ms", 15000);
+                    updates.timeout_ms = upd.value("timeout_ms", 5000);
+                    updates.notify_once = upd.value("notify_once", true);
+                    updates.allow_insecure_mirrors = upd.value("allow_insecure_mirrors", true);
+                    if (upd.contains("mirrors") && upd["mirrors"].is_array()) {
+                        updates.mirrors.clear();
+                        for (const auto& item : upd["mirrors"]) {
+                            if (!item.is_string()) continue;
+                            std::string mirror = item.get<std::string>();
+                            trimInPlace(mirror);
+                            if (!mirror.empty()) {
+                                updates.mirrors.push_back(mirror);
+                            }
+                        }
+                    }
+                }
+                if (updates.check_delay_ms < 0) {
+                    Logger::Warn("配置: updates.check_delay_ms 非法(" + std::to_string(updates.check_delay_ms) + ")，已回退为 15000");
+                    updates.check_delay_ms = 15000;
+                }
+                if (updates.timeout_ms <= 0) {
+                    Logger::Warn("配置: updates.timeout_ms 非法(" + std::to_string(updates.timeout_ms) + ")，已回退为 5000");
+                    updates.timeout_ms = 5000;
                 }
 
                 // ============= 代理路由规则解析 =============
@@ -1010,7 +1062,10 @@ namespace Core {
                              ", child_injection_exclude=" + std::to_string(childInjectionExclude.size()) +
                              ", traffic_logging=" + std::string(trafficLogging ? "true" : "false") +
                              ", diagnostics.agent_ip_probe=" + std::string(diagnosticsAgentIpProbe ? "true" : "false") +
-                             ", ui.load_notify=" + uiLoadNotify);
+                             ", ui.load_notify=" + uiLoadNotify +
+                             ", updates.enabled=" + std::string(updates.enabled ? "true" : "false") +
+                             ", updates.delay_ms=" + std::to_string(updates.check_delay_ms) +
+                             ", updates.mirrors=" + std::to_string(updates.mirrors.size()));
 
                 // CRIT-1/2/WARN-3: 仅在 Load() 成功返回前输出“有效 CIDR 统计 + 跳过数量”，避免失败时误导
                 Logger::Info("路由规则: 编译统计: 有效 IPv4 CIDR=" + std::to_string(rules.compiled_valid_cidr_v4) +
