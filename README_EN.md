@@ -946,7 +946,7 @@ If this project helps you, feel free to:
       <sub>Follow Official Account</sub>
     </td>
     <td align="center">
-      <img src="img/qun-22.jpg" alt="WeChat Group QR Code" width="200"/><br/>
+      <img src="img/qun-23.jpg" alt="WeChat Group QR Code" width="200"/><br/>
       <sub>🔥 Join WeChat Group</sub>
     </td>
   </tr>
